@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>JCT My Timecard</title>
+<style>
+  :root {
+    --navy: #1a2e4a; --navy-light: #243d5e;
+    --red: #c0392b; --white: #ffffff; --bg: #f0f2f5; --surface: #ffffff;
+    --border: #dde1e7; --text: #1a1a2e; --muted: #6b7280;
+    --success: #16a34a; --success-bg: #dcfce7;
+    --warn-bg: #fef3c7; --warn: #b45309;
+    --font: 'Segoe UI', system-ui, sans-serif;
+    --radius: 12px; --radius-sm: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
+  .header { background: var(--navy); color: var(--white); display: flex; align-items: center; justify-content: center; padding: 0 20px; height: 56px; }
+  .header-logo { display: flex; align-items: center; gap: 10px; }
+  .logo-mark { width: 32px; height: 32px; border-radius: 6px; background: var(--red); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; color: white; }
+  .header-logo span { font-weight: 600; font-size: 16px; letter-spacing: 0.5px; }
+  main { min-height: calc(100vh - 56px); background: var(--bg); padding: 20px 16px; display: flex; align-items: flex-start; justify-content: center; }
+  .login-card { background: white; border-radius: var(--radius); padding: 32px 28px; width: 100%; max-width: 410px; margin-top: 18px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+  .login-card h2 { font-size: 20px; color: var(--navy); margin-bottom: 6px; }
+  .login-card p { font-size: 13px; color: var(--muted); margin-bottom: 22px; line-height: 1.4; }
+  .field-label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .field-input { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 15px; font-family: var(--font); color: var(--text); background: var(--bg); transition: border-color 0.15s; }
+  .field-input:focus { outline: none; border-color: var(--navy); background: white; }
+  .form-row { margin-bottom: 14px; }
+  .btn-primary { width: 100%; padding: 12px; background: var(--navy); color: white; border: none; border-radius: var(--radius-sm); font-size: 15px; font-weight: 600; cursor: pointer; font-family: var(--font); margin-top: 4px; transition: background 0.15s; }
+  .btn-primary:hover { background: var(--navy-light); }
+  .btn-secondary { background: transparent; border: 1.5px solid var(--border); color: var(--text); padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; cursor: pointer; font-family: var(--font); transition: all 0.15s; }
+  .btn-secondary:hover { border-color: var(--navy); color: var(--navy); }
+  .link-btn { background: transparent; border: none; color: var(--navy); text-decoration: underline; cursor: pointer; font-size: 13px; margin-top: 12px; font-family: var(--font); width: 100%; }
+  .msg { font-size: 13px; min-height: 20px; margin-top: 10px; text-align:center; color: var(--muted); }
+  .msg.error { color: var(--red); }
+  .msg.success { color: var(--success); }
+  .emp-dashboard { width: 100%; max-width: 760px; display: none; }
+  .emp-header-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; margin-top: 4px; gap: 12px; }
+  .emp-name { font-size: 21px; font-weight: 700; color: var(--navy); }
+  .emp-sub { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+  .summary-card { background: white; border-radius: var(--radius); padding: 16px 18px; border: 1px solid var(--border); }
+  .summary-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 6px; }
+  .summary-val { font-size: 24px; font-weight: 700; color: var(--navy); }
+  .summary-val.green { color: var(--success); }
+  .timecard-table-wrap { background: white; border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; }
+  .table-header { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .table-header h3 { font-size: 14px; font-weight: 600; color: var(--navy); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: #f8f9fb; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px; padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  td { padding: 11px 14px; border-bottom: 1px solid #f1f3f5; color: var(--text); white-space: nowrap; }
+  tr:last-child td { border-bottom: none; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 100px; font-size: 11px; font-weight: 600; }
+  .badge-in { background: var(--success-bg); color: var(--success); }
+  .badge-out { background: #f1f5f9; color: var(--muted); }
+  .badge-lunch { background: var(--warn-bg); color: var(--warn); }
+  .week-filter { display: flex; gap: 8px; }
+  .week-btn { background: var(--bg); border: 1.5px solid var(--border); border-radius: 6px; padding: 5px 12px; font-size: 12px; cursor: pointer; color: var(--muted); font-family: var(--font); }
+  .week-btn.active { background: var(--navy); color: white; border-color: var(--navy); }
+  .notice { background: #fff7ed; border: 1px solid #fed7aa; color: #9a3412; border-radius: var(--radius-sm); padding: 10px 12px; font-size: 13px; margin-bottom: 14px; line-height: 1.4; }
+  @media (max-width: 600px) {
+    main { padding: 16px 10px; }
+    .login-card { padding: 28px 22px; }
+    .summary-grid { grid-template-columns: 1fr; }
+    .emp-header-row { align-items: flex-start; }
+    th, td { padding: 9px 10px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-logo"><div class="logo-mark">JCT</div><span>My Timecard</span></div>
+</div>
+<main>
+  <section id="login-section" class="login-card">
+    <h2>Employee Sign In</h2>
+    <p>Use your employee email and password to view your hours remotely. This portal is view-only and cannot punch in or out.</p>
+    <div class="form-row">
+      <div class="field-label">Email</div>
+      <input class="field-input" type="email" id="login-email" placeholder="name@jctlogisticsinc.com" autocomplete="email" />
+    </div>
+    <div class="form-row">
+      <div class="field-label">Password</div>
+      <input class="field-input" type="password" id="login-password" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')empLogin()" />
+    </div>
+    <button class="btn-primary" onclick="empLogin()">Sign In</button>
+    <button class="link-btn" onclick="resetPassword()">Forgot password?</button>
+    <div class="msg" id="login-msg"></div>
+  </section>
+
+  <section id="emp-dashboard-section" class="emp-dashboard">
+    <div class="notice">This page is view-only. It does not allow mobile punch in or punch out.</div>
+    <div class="emp-header-row">
+      <div>
+        <div class="emp-name" id="emp-display-name"></div>
+        <div class="emp-sub" id="emp-display-sub"></div>
+      </div>
+      <button class="btn-secondary" onclick="empLogout()">Sign Out</button>
+    </div>
+    <div class="summary-grid">
+      <div class="summary-card"><div class="summary-label">This Week</div><div class="summary-val" id="emp-week-hrs">0.0h</div></div>
+      <div class="summary-card"><div class="summary-label">This Month Earnings</div><div class="summary-val green" id="emp-month-earnings">$0.00</div></div>
+    </div>
+    <div class="timecard-table-wrap">
+      <div class="table-header">
+        <h3>My Timecards</h3>
+        <div class="week-filter">
+          <button class="week-btn active" onclick="empFilterDays(7,this)">7 days</button>
+          <button class="week-btn" onclick="empFilterDays(30,this)">30 days</button>
+          <button class="week-btn" onclick="empFilterDays(9999,this)">All</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead><tr><th>Date</th><th>Day In</th><th>Lunch Out</th><th>Lunch In</th><th>Day Out</th><th>Work Hrs</th><th>Status</th></tr></thead>
+          <tbody id="emp-table-body"><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:30px;">No records found</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, collection, doc, getDocs, updateDoc, query, where, orderBy, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCbFvC9C2b6IbrJ6kPHeBshNwkX8UrwK3I",
+  authDomain: "jct-wms.firebaseapp.com",
+  databaseURL: "https://jct-wms-default-rtdb.firebaseio.com",
+  projectId: "jct-wms",
+  storageBucket: "jct-wms.firebasestorage.app",
+  messagingSenderId: "563922884544",
+  appId: "1:563922884544:web:9527692d7b4ca44a4eda25"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+function toTS(d) { return d ? (d.toDate ? d : new Timestamp(d.seconds, d.nanoseconds)) : null; }
+function fmtTime(ts) {
+  if (!ts) return '—';
+  const d = toTS(ts).toDate();
+  return d.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', hour12:true });
+}
+function fmtDate(str) {
+  if (!str) return '—';
+  const [y,m,day] = str.split('-');
+  return new Date(y,m-1,day).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+}
+function workHours(rec) {
+  const i = rec.dayIn ? toTS(rec.dayIn).toDate() : null;
+  const o = rec.dayOut ? toTS(rec.dayOut).toDate() : null;
+  const lo = rec.lunchOut ? toTS(rec.lunchOut).toDate() : null;
+  const li = rec.lunchIn ? toTS(rec.lunchIn).toDate() : null;
+  if (!i || !o) return null;
+  let total = (o - i) / 3600000;
+  if (lo && li && li > lo) total -= (li - lo) / 3600000;
+  return Math.max(0, total);
+}
+function getStatus(rec) {
+  if (!rec.dayIn) return 'none';
+  if (!rec.lunchOut) return 'working';
+  if (!rec.lunchIn) return 'lunch';
+  if (!rec.dayOut) return 'working2';
+  return 'done';
+}
+function statusBadge(rec) {
+  const s = getStatus(rec);
+  if (s === 'done') return '<span class="badge badge-out">Complete</span>';
+  if (s === 'lunch') return '<span class="badge badge-lunch">On Lunch</span>';
+  if (s === 'working' || s === 'working2') return '<span class="badge badge-in">Working</span>';
+  return '<span class="badge badge-out">No Record</span>';
+}
+function setMsg(text, type='') {
+  const msg = document.getElementById('login-msg');
+  msg.textContent = text;
+  msg.className = 'msg' + (type ? ' ' + type : '');
+}
+
+let currentEmp = null;
+let currentUser = null;
+
+window.empLogin = async function() {
+  const email = document.getElementById('login-email').value.trim().toLowerCase();
+  const password = document.getElementById('login-password').value;
+  if (!email || !password) { setMsg('Enter your email and password.','error'); return; }
+  setMsg('Signing in…');
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+  } catch (err) {
+    setMsg('Sign in failed. Check your email and password.','error');
+  }
+};
+
+window.resetPassword = async function() {
+  const email = document.getElementById('login-email').value.trim().toLowerCase();
+  if (!email) { setMsg('Enter your email first, then tap Forgot password.','error'); return; }
+  try {
+    await sendPasswordResetEmail(auth, email);
+    setMsg('Password reset email sent. Check your inbox.','success');
+  } catch (err) {
+    setMsg('Could not send reset email. Check the email address.','error');
+  }
+};
+
+window.empLogout = async function() {
+  await signOut(auth);
+};
+
+onAuthStateChanged(auth, async (user) => {
+  currentUser = user;
+  if (!user) {
+    currentEmp = null;
+    document.getElementById('login-section').style.display = 'block';
+    document.getElementById('emp-dashboard-section').style.display = 'none';
+    document.getElementById('login-password').value = '';
+    return;
+  }
+  await loadEmployeeForUser(user);
+});
+
+async function loadEmployeeForUser(user) {
+  setMsg('Loading your timecard…');
+  const email = (user.email || '').toLowerCase();
+  const snap = await getDocs(query(collection(db,'employees'), where('email','==',email), where('status','==','active')));
+  if (snap.empty) {
+    setMsg('No active employee record is linked to this email. Ask admin to add this email to your employee profile.','error');
+    await signOut(auth);
+    return;
+  }
+  const empDoc = snap.docs[0];
+  currentEmp = { id: empDoc.id, ...empDoc.data() };
+  if (!currentEmp.authUid) {
+    try { await updateDoc(doc(db,'employees',empDoc.id), { authUid: user.uid }); currentEmp.authUid = user.uid; } catch (e) {}
+  }
+  document.getElementById('login-section').style.display = 'none';
+  document.getElementById('emp-dashboard-section').style.display = 'block';
+  document.getElementById('emp-display-name').textContent = currentEmp.name;
+  document.getElementById('emp-display-sub').textContent = `Signed in as ${email} • Rate: $${Number(currentEmp.hourlyRate||0).toFixed(2)}/hr`;
+  setMsg('');
+  await loadEmpTimecards(7);
+}
+
+window.empFilterDays = async function(days, btn) {
+  document.querySelectorAll('.week-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  await loadEmpTimecards(days);
+};
+
+async function loadEmpTimecards(days) {
+  if (!currentEmp || !currentUser) return;
+  const sinceDate = new Date(); sinceDate.setDate(sinceDate.getDate() - days);
+  const sinceStr = sinceDate.toISOString().slice(0,10);
+  const snap = await getDocs(query(collection(db,'timecards'),
+    where('employeeId','==',currentEmp.id),
+    where('date','>=',sinceStr),
+    orderBy('date','desc')
+  ));
+  const recs = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+  const weekAgoStr = new Date(Date.now()-7*86400000).toISOString().slice(0,10);
+  const moAgoStr = new Date(Date.now()-30*86400000).toISOString().slice(0,10);
+  let weekHrs=0, moEarnings=0;
+  recs.forEach(r => {
+    const h = workHours(r);
+    if (!h) return;
+    if (r.date >= weekAgoStr) weekHrs += h;
+    if (r.date >= moAgoStr) moEarnings += h * (currentEmp.hourlyRate||0);
+  });
+  document.getElementById('emp-week-hrs').textContent = weekHrs.toFixed(1)+'h';
+  document.getElementById('emp-month-earnings').textContent = '$'+moEarnings.toFixed(2);
+  const tbody = document.getElementById('emp-table-body');
+  if (!recs.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:30px;">No records found</td></tr>';
+    return;
+  }
+  tbody.innerHTML = recs.map(r => {
+    const h = workHours(r);
+    return `<tr><td>${fmtDate(r.date)}</td><td>${fmtTime(r.dayIn)}</td><td>${fmtTime(r.lunchOut)}</td><td>${fmtTime(r.lunchIn)}</td><td>${fmtTime(r.dayOut)}</td><td>${h ? h.toFixed(2)+'h' : '—'}</td><td>${statusBadge(r)}</td></tr>`;
+  }).join('');
+}
+</script>
+</body>
+</html>
