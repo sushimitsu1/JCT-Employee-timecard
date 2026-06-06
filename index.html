@@ -227,7 +227,15 @@ onAuthStateChanged(auth, async (user) => {
 async function loadEmployeeForUser(user) {
   setMsg('Loading your timecard…');
   const email = (user.email || '').toLowerCase();
-  const snap = await getDocs(query(collection(db,'employees'), where('email','==',email), where('status','==','active')));
+  let snap;
+  try {
+    snap = await getDocs(query(collection(db,'employees'), where('email','==',email), where('status','==','active')));
+  } catch (err) {
+    console.error('Employee lookup failed:', err);
+    setMsg('Could not load employee profile. Firestore rules may be blocking employees collection. ' + (err.code || err.message), 'error');
+    await signOut(auth);
+    return;
+  }
   if (snap.empty) {
     setMsg('No active employee record is linked to this email. Ask admin to add this email to your employee profile.','error');
     await signOut(auth);
@@ -256,12 +264,22 @@ async function loadEmpTimecards(days) {
   if (!currentEmp || !currentUser) return;
   const sinceDate = new Date(); sinceDate.setDate(sinceDate.getDate() - days);
   const sinceStr = sinceDate.toISOString().slice(0,10);
-  const snap = await getDocs(query(collection(db,'timecards'),
-    where('employeeId','==',currentEmp.id),
-    where('date','>=',sinceStr),
-    orderBy('date','desc')
-  ));
+  let snap;
+  try {
+    snap = await getDocs(query(collection(db,'timecards'),
+      where('employeeId','==',currentEmp.id),
+      where('date','>=',sinceStr),
+      orderBy('date','desc')
+    ));
+  } catch (err) {
+    console.error('Timecard query failed:', err);
+    const tbody = document.getElementById('emp-table-body');
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--red);padding:30px;">Could not load timecards: '+(err.code || err.message)+'</td></tr>';
+    setMsg('Signed in, but timecards could not load. Check Firestore rules/indexes. ' + (err.code || err.message), 'error');
+    return;
+  }
   const recs = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+  console.log('Employee document ID:', currentEmp.id, 'Records found:', recs.length, recs);
   const weekAgoStr = new Date(Date.now()-7*86400000).toISOString().slice(0,10);
   const moAgoStr = new Date(Date.now()-30*86400000).toISOString().slice(0,10);
   let weekHrs=0, moEarnings=0;
