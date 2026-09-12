@@ -173,6 +173,10 @@
         <div class="emp-name" id="emp-display-name"></div>
         <div class="emp-sub" id="emp-display-sub"></div>
       </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn-secondary" onclick="printSummary('week')" style="font-size:12px;padding:6px 12px;">🖨 Print This Week</button>
+        <button class="btn-secondary" onclick="printSummary('month')" style="font-size:12px;padding:6px 12px;">🖨 Print This Month</button>
+      </div>
     </div>
     <div class="summary-grid">
       <div class="summary-card"><div class="summary-label">This Week</div><div class="summary-val" id="emp-week-hrs">0.0h</div></div>
@@ -243,7 +247,10 @@
 
     <!-- Payroll Tab -->
     <div class="tab-content" id="tab-payroll">
-      <div class="section-head"><h3>Payroll Summary</h3></div>
+      <div class="section-head">
+        <h3>Payroll Summary</h3>
+        <button class="btn-add" onclick="exportPayrollCSV()">⬇ Export CSV</button>
+      </div>
       <div class="period-selector">
         <label>From:</label><input type="date" id="pr-from" onchange="renderPayroll()" />
         <label>To:</label><input type="date" id="pr-to" onchange="renderPayroll()" />
@@ -341,6 +348,8 @@ const firebaseConfig = {
 
 // ← Change this to your admin PIN
 const ADMIN_PIN = "6688";
+// ← Change this to your own login email
+const ADMIN_EMAIL = "jctlogisticsinc@gmail.com";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -398,7 +407,7 @@ function show(id,display='block'){document.getElementById(id).style.display=disp
 function hide(id){document.getElementById(id).style.display='none';}
 
 // ══ AUTH ══
-let currentEmp=null, currentUser=null;
+let currentEmp=null, currentUser=null, empAllRecords=[];
 
 window.empLogin = async function() {
   const email=document.getElementById('login-email').value.trim().toLowerCase();
@@ -428,6 +437,13 @@ onAuthStateChanged(auth, async (user) => {
   hide('login-section');
   show('header-logout-btn');
   show('admin-toggle-btn');
+  // Admin email bypasses employee lookup — goes straight to admin panel
+  if ((user.email||'').toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+    hide('emp-dashboard-section');
+    show('admin-panel','block');
+    await loadAdminData();
+    return;
+  }
   await loadEmployeeForUser(user);
 });
 
@@ -455,10 +471,12 @@ window.empFilterDays = async function(days,btn) {
 };
 async function loadEmpTimecards(days) {
   if (!currentEmp||!currentUser) return;
-  const sinceStr=new Date(Date.now()-days*86400000).toISOString().slice(0,10);
+  // Always fetch all records; filter locally for display so print always has full data
   try {
-    const snap=await getDocs(query(collection(db,'timecards'),where('employeeId','==',currentEmp.id),where('date','>=',sinceStr),orderBy('date','desc')));
-    const recs=snap.docs.map(d=>({id:d.id,...d.data()}));
+    const snap=await getDocs(query(collection(db,'timecards'),where('employeeId','==',currentEmp.id),orderBy('date','desc')));
+    empAllRecords=snap.docs.map(d=>({id:d.id,...d.data()}));
+    const sinceStr = days >= 9999 ? '0000-00-00' : new Date(Date.now()-days*86400000).toISOString().slice(0,10);
+    const recs = empAllRecords.filter(r => r.date >= sinceStr);
     const weekAgoStr=new Date(Date.now()-7*86400000).toISOString().slice(0,10);
     const moAgoStr=new Date(Date.now()-30*86400000).toISOString().slice(0,10);
     let weekHrs=0,moEarnings=0;
@@ -667,6 +685,108 @@ window.saveTc = async function() {
   if (editingTcId){await updateDoc(doc(db,'timecards',editingTcId),data);}
   else{await addDoc(collection(db,'timecards'),data);}
   closeTcModal(); await loadAdminData();
+};
+// ══ PRINT SUMMARY ══
+window.printSummary = function(period) {
+  if (!currentEmp) return;
+  const now = new Date();
+  let fromDate, toDate, periodLabel;
+  if (period === 'week') {
+    const day = now.getDay();
+    fromDate = new Date(now); fromDate.setDate(now.getDate() - day);
+    toDate = new Date(now); toDate.setDate(now.getDate() + (6 - day));
+    periodLabel = `Week of ${fromDate.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}`;
+  } else {
+    fromDate = new Date(now.getFullYear(), now.getMonth(), 1);
+    toDate   = new Date(now.getFullYear(), now.getMonth()+1, 0);
+    periodLabel = now.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  }
+  const fromStr = fromDate.toISOString().slice(0,10);
+  const toStr   = toDate.toISOString().slice(0,10);
+  const recs = empAllRecords.filter(r => r.date >= fromStr && r.date <= toStr);
+  const totalHrs = recs.reduce((s,r) => s+(workHours(r)||0), 0);
+  const totalPay = totalHrs * (currentEmp.hourlyRate||0);
+
+  const rows = recs.map(r => {
+    const h = workHours(r)||0;
+    return `<tr>
+      <td>${fmtDate(r.date)}</td>
+      <td>${fmtTime(r.dayIn)}</td>
+      <td>${fmtTime(r.lunchOut)}</td>
+      <td>${fmtTime(r.lunchIn)}</td>
+      <td>${fmtTime(r.dayOut)}</td>
+      <td style="text-align:right;">${h.toFixed(2)}</td>
+      <td style="text-align:right;">$${(h*(currentEmp.hourlyRate||0)).toFixed(2)}</td>
+    </tr>`;
+  }).join('');
+
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"/>
+  <title>JCT Timecard — ${currentEmp.name}</title>
+  <style>
+    body{font-family:'Segoe UI',sans-serif;padding:32px;color:#1a1a2e;max-width:800px;margin:0 auto;}
+    .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #1a2e4a;}
+    .company{font-size:20px;font-weight:800;color:#1a2e4a;}
+    .doc-title{font-size:13px;color:#6b7280;margin-top:2px;}
+    .emp-info{text-align:right;font-size:13px;}
+    .emp-info strong{font-size:16px;display:block;color:#1a2e4a;}
+    .period-bar{background:#1a2e4a;color:white;padding:10px 16px;border-radius:8px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;}
+    .period-bar span{font-size:13px;opacity:0.7;}
+    .period-bar strong{font-size:15px;}
+    table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:20px;}
+    th{background:#f8f9fb;color:#6b7280;font-size:11px;text-transform:uppercase;letter-spacing:0.4px;padding:9px 12px;text-align:left;border-bottom:2px solid #dde1e7;}
+    td{padding:9px 12px;border-bottom:1px solid #f1f3f5;}
+    .totals-row{background:#f0f2f5;font-weight:700;}
+    .totals-row td{border-top:2px solid #dde1e7;padding:11px 12px;}
+    .footer{font-size:11px;color:#9ca3af;margin-top:24px;text-align:center;}
+    @media print{body{padding:16px;}.no-print{display:none;}}
+  </style></head><body>
+  <div class="header">
+    <div><div class="company">JCT Logistics Inc.</div><div class="doc-title">Employee Timecard Summary</div></div>
+    <div class="emp-info"><strong>${currentEmp.name}</strong>Rate: $${Number(currentEmp.hourlyRate||0).toFixed(2)}/hr</div>
+  </div>
+  <div class="period-bar"><span>Period</span><strong>${periodLabel}</strong></div>
+  ${recs.length === 0 ? '<p style="text-align:center;color:#6b7280;padding:30px;">No records for this period.</p>' : `
+  <table>
+    <thead><tr><th>Date</th><th>Day In</th><th>Lunch Out</th><th>Lunch In</th><th>Day Out</th><th style="text-align:right;">Hours</th><th style="text-align:right;">Earnings</th></tr></thead>
+    <tbody>${rows}</tbody>
+    <tfoot><tr class="totals-row">
+      <td colspan="5">TOTAL</td>
+      <td style="text-align:right;">${totalHrs.toFixed(2)} hrs</td>
+      <td style="text-align:right;">$${totalPay.toFixed(2)}</td>
+    </tr></tfoot>
+  </table>`}
+  <div class="footer">Generated ${now.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'})} · JCT Timecard System · This document is for informational purposes only.</div>
+  <div class="no-print" style="text-align:center;margin-top:24px;">
+    <button onclick="window.print()" style="padding:10px 24px;background:#1a2e4a;color:white;border:none;border-radius:8px;font-size:14px;cursor:pointer;">🖨 Print / Save as PDF</button>
+    <button onclick="window.close()" style="padding:10px 24px;background:transparent;border:1.5px solid #dde1e7;border-radius:8px;font-size:14px;cursor:pointer;margin-left:8px;">Close</button>
+  </div>
+  </body></html>`;
+
+  const w = window.open('','_blank','width=900,height=700');
+  w.document.write(html); w.document.close();
+};
+
+// ══ CSV EXPORT ══
+window.exportPayrollCSV = function() {
+  const from = document.getElementById('pr-from').value;
+  const to   = document.getElementById('pr-to').value;
+  if (!from || !to) { alert('Set a date range in the Payroll tab first.'); return; }
+
+  const rows = [['Employee','Email','Hourly Rate','Total Hours','Gross Pay','Period From','Period To']];
+  allEmployees.forEach(emp => {
+    const recs = allTimecards.filter(r => r.employeeId===emp.id && r.date>=from && r.date<=to);
+    const hrs  = recs.reduce((s,r) => s+(workHours(r)||0), 0);
+    const pay  = hrs * (emp.hourlyRate||0);
+    rows.push([emp.name, emp.email||'', `$${Number(emp.hourlyRate||0).toFixed(2)}`, hrs.toFixed(2), `$${pay.toFixed(2)}`, from, to]);
+  });
+
+  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = `JCT_Payroll_${from}_to_${to}.csv`;
+  a.click(); URL.revokeObjectURL(url);
 };
 </script>
 </body>
