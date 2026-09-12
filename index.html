@@ -4,79 +4,154 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>JCT My Timecard</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg" />
 <style>
   :root {
-    --navy: #1a2e4a; --navy-light: #243d5e;
-    --red: #c0392b; --white: #ffffff; --bg: #f0f2f5; --surface: #ffffff;
-    --border: #dde1e7; --text: #1a1a2e; --muted: #6b7280;
-    --success: #16a34a; --success-bg: #dcfce7;
-    --warn-bg: #fef3c7; --warn: #b45309;
-    --font: 'Segoe UI', system-ui, sans-serif;
-    --radius: 12px; --radius-sm: 8px;
+    --navy:#1a2e4a; --navy-light:#243d5e; --red:#c0392b; --red-light:#e74c3c;
+    --white:#ffffff; --bg:#f0f2f5; --border:#dde1e7; --text:#1a1a2e; --muted:#6b7280;
+    --success:#16a34a; --success-bg:#dcfce7; --warn-bg:#fef3c7; --warn:#b45309;
+    --font:'Segoe UI',system-ui,sans-serif; --radius:12px; --radius-sm:8px;
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
-  .header { background: var(--navy); color: var(--white); display: flex; align-items: center; justify-content: center; padding: 0 20px; height: 56px; }
-  .header-logo { display: flex; align-items: center; gap: 10px; }
-  .logo-mark { width: 32px; height: 32px; border-radius: 6px; background: var(--red); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; color: white; }
-  .header-logo span { font-weight: 600; font-size: 16px; letter-spacing: 0.5px; }
-  main { min-height: calc(100vh - 56px); background: var(--bg); padding: 20px 16px; display: flex; align-items: flex-start; justify-content: center; }
-  .login-card { background: white; border-radius: var(--radius); padding: 32px 28px; width: 100%; max-width: 410px; margin-top: 18px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-  .login-card h2 { font-size: 20px; color: var(--navy); margin-bottom: 6px; }
-  .login-card p { font-size: 13px; color: var(--muted); margin-bottom: 22px; line-height: 1.4; }
-  .field-label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
-  .field-input { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 15px; font-family: var(--font); color: var(--text); background: var(--bg); transition: border-color 0.15s; }
-  .field-input:focus { outline: none; border-color: var(--navy); background: white; }
-  .form-row { margin-bottom: 14px; }
-  .btn-primary { width: 100%; padding: 12px; background: var(--navy); color: white; border: none; border-radius: var(--radius-sm); font-size: 15px; font-weight: 600; cursor: pointer; font-family: var(--font); margin-top: 4px; transition: background 0.15s; }
-  .btn-primary:hover { background: var(--navy-light); }
-  .btn-secondary { background: transparent; border: 1.5px solid var(--border); color: var(--text); padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; cursor: pointer; font-family: var(--font); transition: all 0.15s; }
-  .btn-secondary:hover { border-color: var(--navy); color: var(--navy); }
-  .link-btn { background: transparent; border: none; color: var(--navy); text-decoration: underline; cursor: pointer; font-size: 13px; margin-top: 12px; font-family: var(--font); width: 100%; }
-  .msg { font-size: 13px; min-height: 20px; margin-top: 10px; text-align:center; color: var(--muted); }
-  .msg.error { color: var(--red); }
-  .msg.success { color: var(--success); }
-  .emp-dashboard { width: 100%; max-width: 760px; display: none; }
-  .emp-header-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; margin-top: 4px; gap: 12px; }
-  .emp-name { font-size: 21px; font-weight: 700; color: var(--navy); }
-  .emp-sub { font-size: 13px; color: var(--muted); margin-top: 2px; }
-  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-  .summary-card { background: white; border-radius: var(--radius); padding: 16px 18px; border: 1px solid var(--border); }
-  .summary-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 6px; }
-  .summary-val { font-size: 24px; font-weight: 700; color: var(--navy); }
-  .summary-val.green { color: var(--success); }
-  .timecard-table-wrap { background: white; border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; }
-  .table-header { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .table-header h3 { font-size: 14px; font-weight: 600; color: var(--navy); }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th { background: #f8f9fb; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px; padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
-  td { padding: 11px 14px; border-bottom: 1px solid #f1f3f5; color: var(--text); white-space: nowrap; }
-  tr:last-child td { border-bottom: none; }
-  .badge { display: inline-block; padding: 3px 10px; border-radius: 100px; font-size: 11px; font-weight: 600; }
-  .badge-in { background: var(--success-bg); color: var(--success); }
-  .badge-out { background: #f1f5f9; color: var(--muted); }
-  .badge-lunch { background: var(--warn-bg); color: var(--warn); }
-  .week-filter { display: flex; gap: 8px; }
-  .week-btn { background: var(--bg); border: 1.5px solid var(--border); border-radius: 6px; padding: 5px 12px; font-size: 12px; cursor: pointer; color: var(--muted); font-family: var(--font); }
-  .week-btn.active { background: var(--navy); color: white; border-color: var(--navy); }
-  .notice { background: #fff7ed; border: 1px solid #fed7aa; color: #9a3412; border-radius: var(--radius-sm); padding: 10px 12px; font-size: 13px; margin-bottom: 14px; line-height: 1.4; }
-  @media (max-width: 600px) {
-    main { padding: 16px 10px; }
-    .login-card { padding: 28px 22px; }
-    .summary-grid { grid-template-columns: 1fr; }
-    .emp-header-row { align-items: flex-start; }
-    th, td { padding: 9px 10px; font-size: 12px; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;}
+
+  /* HEADER */
+  .header{background:var(--navy);color:var(--white);display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:56px;}
+  .header-logo{display:flex;align-items:center;gap:10px;}
+  .logo-mark{width:32px;height:32px;border-radius:6px;background:var(--red);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:white;}
+  .header-logo span{font-weight:600;font-size:16px;letter-spacing:0.5px;}
+  .header-right{display:flex;align-items:center;gap:8px;}
+  .admin-toggle-btn{background:transparent;border:1px solid rgba(255,255,255,0.3);color:rgba(255,255,255,0.75);padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:var(--font);}
+  .admin-toggle-btn:hover{background:rgba(255,255,255,0.1);color:white;}
+  .logout-btn{background:transparent;border:1px solid rgba(255,255,255,0.3);color:rgba(255,255,255,0.75);padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:var(--font);}
+  .logout-btn:hover{background:rgba(255,255,255,0.1);color:white;}
+
+  /* MAIN */
+  main{min-height:calc(100vh - 56px);background:var(--bg);padding:20px 16px;display:flex;flex-direction:column;align-items:center;}
+
+  /* LOGIN */
+  .login-card{background:white;border-radius:var(--radius);padding:32px 28px;width:100%;max-width:410px;margin-top:18px;box-shadow:0 4px 20px rgba(0,0,0,0.08);}
+  .login-card h2{font-size:20px;color:var(--navy);margin-bottom:6px;}
+  .login-card p{font-size:13px;color:var(--muted);margin-bottom:22px;line-height:1.4;}
+  .field-label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;}
+  .field-input{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:15px;font-family:var(--font);color:var(--text);background:var(--bg);transition:border-color 0.15s;}
+  .field-input:focus{outline:none;border-color:var(--navy);background:white;}
+  .form-row{margin-bottom:14px;}
+  .form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+  .btn-primary{width:100%;padding:11px;background:var(--navy);color:white;border:none;border-radius:var(--radius-sm);font-size:15px;font-weight:600;cursor:pointer;font-family:var(--font);margin-top:4px;transition:background 0.15s;}
+  .btn-primary:hover{background:var(--navy-light);}
+  .btn-secondary{background:transparent;border:1.5px solid var(--border);color:var(--text);padding:8px 16px;border-radius:var(--radius-sm);font-size:13px;cursor:pointer;font-family:var(--font);transition:all 0.15s;}
+  .btn-secondary:hover{border-color:var(--navy);color:var(--navy);}
+  .link-btn{background:transparent;border:none;color:var(--navy);text-decoration:underline;cursor:pointer;font-size:13px;margin-top:12px;font-family:var(--font);width:100%;}
+  .msg{font-size:13px;min-height:20px;margin-top:10px;text-align:center;color:var(--muted);}
+  .msg.error{color:var(--red);}
+  .msg.success{color:var(--success);}
+
+  /* EMPLOYEE DASHBOARD */
+  .emp-dashboard{width:100%;max-width:760px;display:none;}
+  .emp-header-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;margin-top:4px;gap:12px;}
+  .emp-name{font-size:21px;font-weight:700;color:var(--navy);}
+  .emp-sub{font-size:13px;color:var(--muted);margin-top:2px;}
+  .summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
+  .summary-card{background:white;border-radius:var(--radius);padding:16px 18px;border:1px solid var(--border);}
+  .summary-label{font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);margin-bottom:6px;}
+  .summary-val{font-size:24px;font-weight:700;color:var(--navy);}
+  .summary-val.green{color:var(--success);}
+  .timecard-table-wrap{background:white;border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;}
+  .table-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;}
+  .table-header h3{font-size:14px;font-weight:600;color:var(--navy);}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th{background:#f8f9fb;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:0.4px;padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;}
+  td{padding:11px 14px;border-bottom:1px solid #f1f3f5;color:var(--text);white-space:nowrap;}
+  tr:last-child td{border-bottom:none;}
+  .badge{display:inline-block;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:600;}
+  .badge-in{background:var(--success-bg);color:var(--success);}
+  .badge-out{background:#f1f5f9;color:var(--muted);}
+  .badge-lunch{background:var(--warn-bg);color:var(--warn);}
+  .week-filter{display:flex;gap:8px;}
+  .week-btn{background:var(--bg);border:1.5px solid var(--border);border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;color:var(--muted);font-family:var(--font);}
+  .week-btn.active{background:var(--navy);color:white;border-color:var(--navy);}
+  .notice{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;border-radius:var(--radius-sm);padding:10px 12px;font-size:13px;margin-bottom:14px;line-height:1.4;}
+
+  /* ADMIN PIN MODAL */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:1000;padding:20px;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:white;border-radius:var(--radius);padding:28px 32px;width:100%;max-width:360px;}
+  .modal-title{font-size:17px;font-weight:700;color:var(--navy);margin-bottom:6px;}
+  .modal-sub{font-size:13px;color:var(--muted);margin-bottom:20px;}
+  .pin-display{display:flex;justify-content:center;gap:12px;margin-bottom:16px;}
+  .pin-dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--border);background:transparent;transition:all 0.1s;}
+  .pin-dot.filled{background:var(--navy);border-color:var(--navy);}
+  .pin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
+  .pin-key{background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:13px;font-size:18px;font-weight:600;cursor:pointer;transition:all 0.1s;color:var(--text);}
+  .pin-key:hover{background:var(--navy);color:white;border-color:var(--navy);}
+  .pin-key:active{transform:scale(0.95);}
+  .modal-cancel{width:100%;padding:9px;background:transparent;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:14px;cursor:pointer;font-family:var(--font);color:var(--muted);margin-top:4px;}
+  .modal-cancel:hover{border-color:var(--red);color:var(--red);}
+
+  /* ADMIN PANEL */
+  .admin-panel{width:100%;max-width:900px;display:none;margin-top:4px;}
+  .admin-header-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;gap:12px;flex-wrap:wrap;}
+  .admin-header-row h2{font-size:20px;font-weight:700;color:var(--navy);}
+  .admin-tabs{display:flex;gap:4px;margin-bottom:24px;background:white;border-radius:var(--radius-sm);padding:4px;border:1px solid var(--border);width:fit-content;flex-wrap:wrap;}
+  .tab-btn{padding:8px 16px;border:none;border-radius:6px;background:transparent;cursor:pointer;font-size:13px;font-weight:500;color:var(--muted);font-family:var(--font);transition:all 0.15s;}
+  .tab-btn.active{background:var(--navy);color:white;}
+  .tab-content{display:none;}
+  .tab-content.active{display:block;}
+  .section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
+  .section-head h3{font-size:16px;font-weight:700;color:var(--navy);}
+  .btn-add{background:var(--red);color:white;border:none;padding:9px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);}
+  .btn-add:hover{background:var(--red-light);}
+  .admin-table-wrap{background:white;border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;overflow-x:auto;}
+  .empty-state{padding:40px;text-align:center;color:var(--muted);font-size:14px;}
+  .filter-bar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center;}
+  .filter-bar select,.filter-bar input[type=date]{border:1.5px solid var(--border);border-radius:6px;padding:7px 12px;font-size:13px;font-family:var(--font);color:var(--text);background:white;}
+  .btn-edit-sm{background:transparent;border:1.5px solid var(--border);color:var(--text);padding:4px 10px;border-radius:5px;font-size:11px;cursor:pointer;font-family:var(--font);}
+  .btn-edit-sm:hover{border-color:var(--navy);color:var(--navy);}
+  .btn-danger{background:var(--red);color:white;border:none;padding:9px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);}
+
+  /* PAYROLL */
+  .payroll-card{background:white;border-radius:var(--radius);border:1px solid var(--border);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:10px;}
+  .payroll-emp-name{font-weight:600;font-size:15px;color:var(--navy);}
+  .payroll-meta{font-size:12px;color:var(--muted);margin-top:3px;}
+  .payroll-amount{font-size:22px;font-weight:700;color:var(--success);}
+  .payroll-hours{font-size:12px;color:var(--muted);text-align:right;}
+  .period-selector{display:flex;gap:8px;align-items:center;margin-bottom:20px;flex-wrap:wrap;}
+  .period-selector label{font-size:13px;color:var(--muted);}
+  .period-selector input[type=date]{border:1.5px solid var(--border);border-radius:6px;padding:6px 10px;font-size:13px;font-family:var(--font);color:var(--text);background:white;}
+  .period-total-bar{background:var(--navy);color:white;border-radius:var(--radius);padding:16px 20px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+  .period-total-bar span{font-size:13px;opacity:0.7;}
+  .period-total-bar strong{font-size:22px;}
+
+  /* TC EDIT MODAL */
+  .tc-modal{max-width:460px;}
+  .modal-note{font-size:12px;color:var(--muted);background:var(--bg);border-radius:6px;padding:10px 12px;margin-bottom:16px;}
+  .modal-actions{display:flex;gap:10px;margin-top:20px;justify-content:flex-end;flex-wrap:wrap;}
+
+  @media(max-width:600px){
+    main{padding:16px 10px;}
+    .login-card{padding:28px 20px;}
+    .summary-grid{grid-template-columns:1fr;}
+    .form-row-2{grid-template-columns:1fr;}
+    th,td{padding:9px 10px;font-size:12px;}
+    .modal{padding:24px 20px;}
   }
 </style>
 </head>
 <body>
 <div class="header">
   <div class="header-logo"><div class="logo-mark">JCT</div><span>My Timecard</span></div>
+  <div class="header-right">
+    <button class="admin-toggle-btn" id="admin-toggle-btn" onclick="openAdminPinModal()" style="display:none;">⚙ Admin</button>
+    <button class="logout-btn" id="header-logout-btn" onclick="empLogout()" style="display:none;">Sign Out</button>
+  </div>
 </div>
+
 <main>
+  <!-- LOGIN -->
   <section id="login-section" class="login-card">
     <h2>Employee Sign In</h2>
-    <p>Use your employee email and password to view your hours remotely. This portal is view-only and cannot punch in or out.</p>
+    <p>Use your employee email and password to view your hours. This portal is view-only and cannot punch in or out.</p>
     <div class="form-row">
       <div class="field-label">Email</div>
       <input class="field-input" type="email" id="login-email" placeholder="name@jctlogisticsinc.com" autocomplete="email" />
@@ -90,14 +165,14 @@
     <div class="msg" id="login-msg"></div>
   </section>
 
+  <!-- EMPLOYEE DASHBOARD -->
   <section id="emp-dashboard-section" class="emp-dashboard">
-    <div class="notice">This page is view-only. It does not allow mobile punch in or punch out.</div>
+    <div class="notice">This page is view-only. Punch in/out is only available on the work PC kiosk.</div>
     <div class="emp-header-row">
       <div>
         <div class="emp-name" id="emp-display-name"></div>
         <div class="emp-sub" id="emp-display-sub"></div>
       </div>
-      <button class="btn-secondary" onclick="empLogout()">Sign Out</button>
     </div>
     <div class="summary-grid">
       <div class="summary-card"><div class="summary-label">This Week</div><div class="summary-val" id="emp-week-hrs">0.0h</div></div>
@@ -120,12 +195,140 @@
       </div>
     </div>
   </section>
+
+  <!-- ADMIN PANEL -->
+  <section id="admin-panel" class="admin-panel">
+    <div class="admin-header-row">
+      <h2>Admin Panel</h2>
+      <button class="btn-secondary" onclick="exitAdmin()">← Back to My Timecard</button>
+    </div>
+    <div class="admin-tabs">
+      <button class="tab-btn active" onclick="adminTab('employees',this)">Employees</button>
+      <button class="tab-btn" onclick="adminTab('timecards',this)">Timecards</button>
+      <button class="tab-btn" onclick="adminTab('payroll',this)">Payroll</button>
+    </div>
+
+    <!-- Employees Tab -->
+    <div class="tab-content active" id="tab-employees">
+      <div class="section-head">
+        <h3>Employees</h3>
+        <button class="btn-add" onclick="openEmpModal()">+ Add Employee</button>
+      </div>
+      <div class="admin-table-wrap">
+        <table>
+          <thead><tr><th>Name</th><th>Email</th><th>PIN</th><th>Hourly Rate</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="admin-emp-table"><tr><td colspan="6" class="empty-state">No employees yet</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Timecards Tab -->
+    <div class="tab-content" id="tab-timecards">
+      <div class="section-head">
+        <h3>All Timecards</h3>
+        <button class="btn-add" onclick="openAddTcModal()">+ Add Entry</button>
+      </div>
+      <div class="filter-bar">
+        <select id="tc-filter-emp" onchange="renderAdminTimecards()"><option value="">All Employees</option></select>
+        <input type="date" id="tc-filter-from" onchange="renderAdminTimecards()" />
+        <input type="date" id="tc-filter-to" onchange="renderAdminTimecards()" />
+      </div>
+      <div class="admin-table-wrap">
+        <table>
+          <thead><tr><th>Employee</th><th>Date</th><th>Day In</th><th>Lunch Out</th><th>Lunch In</th><th>Day Out</th><th>Work Hrs</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="admin-tc-table"><tr><td colspan="9" class="empty-state">No records</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Payroll Tab -->
+    <div class="tab-content" id="tab-payroll">
+      <div class="section-head"><h3>Payroll Summary</h3></div>
+      <div class="period-selector">
+        <label>From:</label><input type="date" id="pr-from" onchange="renderPayroll()" />
+        <label>To:</label><input type="date" id="pr-to" onchange="renderPayroll()" />
+      </div>
+      <div class="period-total-bar"><span>Total Payroll</span><strong id="pr-total">$0.00</strong></div>
+      <div id="payroll-list"></div>
+    </div>
+  </section>
 </main>
+
+<!-- Admin PIN Modal -->
+<div class="modal-overlay" id="admin-pin-modal">
+  <div class="modal">
+    <div class="modal-title">Admin Access</div>
+    <div class="modal-sub">Enter your admin PIN to continue</div>
+    <div class="pin-display">
+      <div class="pin-dot" id="apd0"></div><div class="pin-dot" id="apd1"></div>
+      <div class="pin-dot" id="apd2"></div><div class="pin-dot" id="apd3"></div>
+    </div>
+    <div class="pin-grid">
+      <button class="pin-key" onclick="adminPinPress('1')">1</button>
+      <button class="pin-key" onclick="adminPinPress('2')">2</button>
+      <button class="pin-key" onclick="adminPinPress('3')">3</button>
+      <button class="pin-key" onclick="adminPinPress('4')">4</button>
+      <button class="pin-key" onclick="adminPinPress('5')">5</button>
+      <button class="pin-key" onclick="adminPinPress('6')">6</button>
+      <button class="pin-key" onclick="adminPinPress('7')">7</button>
+      <button class="pin-key" onclick="adminPinPress('8')">8</button>
+      <button class="pin-key" onclick="adminPinPress('9')">9</button>
+      <button class="pin-key" onclick="adminPinClear()" style="font-size:12px;color:var(--muted)">CLR</button>
+      <button class="pin-key" onclick="adminPinPress('0')">0</button>
+      <button class="pin-key" onclick="adminPinBack()" style="font-size:14px;color:var(--muted)">⌫</button>
+    </div>
+    <div class="msg error" id="admin-pin-msg" style="margin-bottom:8px;"></div>
+    <button class="modal-cancel" onclick="closeAdminPinModal()">Cancel</button>
+  </div>
+</div>
+
+<!-- Employee Edit Modal -->
+<div class="modal-overlay" id="emp-modal">
+  <div class="modal">
+    <div class="modal-title" id="emp-modal-title">Add Employee</div>
+    <div class="form-row"><div class="field-label">Full Name</div><input class="field-input" id="emp-form-name" placeholder="e.g. John Smith" /></div>
+    <div class="form-row"><div class="field-label">Email (for mobile portal)</div><input class="field-input" id="emp-form-email" type="email" placeholder="name@email.com" /></div>
+    <div class="form-row-2">
+      <div><div class="field-label">4-Digit PIN</div><input class="field-input" id="emp-form-pin" type="text" inputmode="numeric" maxlength="4" placeholder="1234" /></div>
+      <div><div class="field-label">Hourly Rate ($)</div><input class="field-input" id="emp-form-rate" type="number" step="0.01" min="0" placeholder="18.00" /></div>
+    </div>
+    <div class="form-row"><div class="field-label">Status</div><select class="field-input" id="emp-form-status"><option value="active">Active</option><option value="inactive">Inactive</option></select></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeEmpModal()">Cancel</button>
+      <button class="btn-primary" style="width:auto;margin:0;" onclick="saveEmployee()">Save</button>
+    </div>
+    <div class="msg error" id="emp-form-msg" style="margin-top:10px;"></div>
+  </div>
+</div>
+
+<!-- Timecard Edit Modal -->
+<div class="modal-overlay" id="tc-modal">
+  <div class="modal tc-modal">
+    <div class="modal-title" id="tc-modal-title">Edit Timecard</div>
+    <div class="modal-note">Leave a field blank if that punch hasn't happened yet.</div>
+    <div class="form-row"><div class="field-label">Employee</div><select class="field-input" id="tc-form-emp"></select></div>
+    <div class="form-row"><div class="field-label">Date</div><input class="field-input" type="date" id="tc-form-date" /></div>
+    <div class="form-row-2">
+      <div><div class="field-label">Day In</div><input class="field-input" type="time" id="tc-form-in" /></div>
+      <div><div class="field-label">Lunch Out</div><input class="field-input" type="time" id="tc-form-lout" /></div>
+    </div>
+    <div class="form-row-2">
+      <div><div class="field-label">Lunch In</div><input class="field-input" type="time" id="tc-form-lin" /></div>
+      <div><div class="field-label">Day Out</div><input class="field-input" type="time" id="tc-form-out" /></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeTcModal()">Cancel</button>
+      <button class="btn-danger" id="tc-delete-btn" onclick="deleteTc()" style="display:none;">Delete</button>
+      <button class="btn-primary" style="width:auto;margin:0;" onclick="saveTc()">Save</button>
+    </div>
+    <div class="msg error" id="tc-form-msg" style="margin-top:10px;"></div>
+  </div>
+</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, collection, doc, getDocs, updateDoc, query, where, orderBy, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, doc, getDocs, addDoc, setDoc, updateDoc, deleteDoc, query, where, orderBy, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDpYFLdEDHYhqNfwQv96TZomp2okPKGKWM",
@@ -136,30 +339,42 @@ const firebaseConfig = {
   appId: "1:184535370855:web:08539a1556cb77b7f498c2"
 };
 
+// ← Change this to your admin PIN
+const ADMIN_PIN = "6688";
+
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore(app);
+const db   = getFirestore(app);
 
+// ══ HELPERS ══
 function toTS(d) { return d ? (d.toDate ? d : new Timestamp(d.seconds, d.nanoseconds)) : null; }
 function fmtTime(ts) {
   if (!ts) return '—';
-  const d = toTS(ts).toDate();
-  return d.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', hour12:true });
+  return toTS(ts).toDate().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
 }
 function fmtDate(str) {
   if (!str) return '—';
-  const [y,m,day] = str.split('-');
-  return new Date(y,m-1,day).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+  const [y,m,d] = str.split('-');
+  return new Date(y,m-1,d).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+}
+function todayStr() {
+  const n=new Date();
+  return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;
+}
+function dateTimeToTS(dateStr, timeStr) {
+  if (!dateStr || !timeStr) return null;
+  const [h,m] = timeStr.split(':'); const [y,mo,d] = dateStr.split('-');
+  return Timestamp.fromDate(new Date(y,mo-1,d,h,m,0));
 }
 function workHours(rec) {
-  const i = rec.dayIn ? toTS(rec.dayIn).toDate() : null;
-  const o = rec.dayOut ? toTS(rec.dayOut).toDate() : null;
-  const lo = rec.lunchOut ? toTS(rec.lunchOut).toDate() : null;
-  const li = rec.lunchIn ? toTS(rec.lunchIn).toDate() : null;
-  if (!i || !o) return null;
-  let total = (o - i) / 3600000;
-  if (lo && li && li > lo) total -= (li - lo) / 3600000;
-  return Math.max(0, total);
+  const i=rec.dayIn?toTS(rec.dayIn).toDate():null;
+  const o=rec.dayOut?toTS(rec.dayOut).toDate():null;
+  const lo=rec.lunchOut?toTS(rec.lunchOut).toDate():null;
+  const li=rec.lunchIn?toTS(rec.lunchIn).toDate():null;
+  if (!i||!o) return null;
+  let total=(o-i)/3600000;
+  if (lo&&li&&li>lo) total-=(li-lo)/3600000;
+  return Math.max(0,total);
 }
 function getStatus(rec) {
   if (!rec.dayIn) return 'none';
@@ -169,137 +384,290 @@ function getStatus(rec) {
   return 'done';
 }
 function statusBadge(rec) {
-  const s = getStatus(rec);
-  if (s === 'done') return '<span class="badge badge-out">Complete</span>';
-  if (s === 'lunch') return '<span class="badge badge-lunch">On Lunch</span>';
-  if (s === 'working' || s === 'working2') return '<span class="badge badge-in">Working</span>';
+  const s=getStatus(rec);
+  if (s==='done') return '<span class="badge badge-out">Complete</span>';
+  if (s==='lunch') return '<span class="badge badge-lunch">On Lunch</span>';
+  if (s==='working'||s==='working2') return '<span class="badge badge-in">Working</span>';
   return '<span class="badge badge-out">No Record</span>';
 }
-function setMsg(text, type='') {
-  const msg = document.getElementById('login-msg');
-  msg.textContent = text;
-  msg.className = 'msg' + (type ? ' ' + type : '');
+function setMsg(text,type='') {
+  const m=document.getElementById('login-msg');
+  m.textContent=text; m.className='msg'+(type?' '+type:'');
 }
+function show(id,display='block'){document.getElementById(id).style.display=display;}
+function hide(id){document.getElementById(id).style.display='none';}
 
-let currentEmp = null;
-let currentUser = null;
+// ══ AUTH ══
+let currentEmp=null, currentUser=null;
 
 window.empLogin = async function() {
-  const email = document.getElementById('login-email').value.trim().toLowerCase();
-  const password = document.getElementById('login-password').value;
-  if (!email || !password) { setMsg('Enter your email and password.','error'); return; }
+  const email=document.getElementById('login-email').value.trim().toLowerCase();
+  const password=document.getElementById('login-password').value;
+  if (!email||!password){setMsg('Enter your email and password.','error');return;}
   setMsg('Signing in…');
-  try {
-    await signInWithEmailAndPassword(auth, email, password);
-  } catch (err) {
-    setMsg('Sign in failed. Check your email and password.','error');
-  }
+  try { await signInWithEmailAndPassword(auth,email,password); }
+  catch(err) { setMsg('Sign in failed. Check your email and password.','error'); }
 };
-
 window.resetPassword = async function() {
-  const email = document.getElementById('login-email').value.trim().toLowerCase();
-  if (!email) { setMsg('Enter your email first, then tap Forgot password.','error'); return; }
-  try {
-    await sendPasswordResetEmail(auth, email);
-    setMsg('Password reset email sent. Check your inbox.','success');
-  } catch (err) {
-    setMsg('Could not send reset email. Check the email address.','error');
-  }
+  const email=document.getElementById('login-email').value.trim().toLowerCase();
+  if (!email){setMsg('Enter your email first, then tap Forgot password.','error');return;}
+  try { await sendPasswordResetEmail(auth,email); setMsg('Password reset email sent.','success'); }
+  catch(err) { setMsg('Could not send reset email.','error'); }
 };
-
-window.empLogout = async function() {
-  await signOut(auth);
-};
+window.empLogout = async function() { await signOut(auth); };
 
 onAuthStateChanged(auth, async (user) => {
-  currentUser = user;
+  currentUser=user;
   if (!user) {
-    currentEmp = null;
-    document.getElementById('login-section').style.display = 'block';
-    document.getElementById('emp-dashboard-section').style.display = 'none';
-    document.getElementById('login-password').value = '';
+    currentEmp=null;
+    show('login-section'); hide('emp-dashboard-section'); hide('admin-panel');
+    hide('header-logout-btn'); hide('admin-toggle-btn');
+    document.getElementById('login-password').value='';
     return;
   }
+  hide('login-section');
+  show('header-logout-btn');
+  show('admin-toggle-btn');
   await loadEmployeeForUser(user);
 });
 
 async function loadEmployeeForUser(user) {
   setMsg('Loading your timecard…');
-  const email = (user.email || '').toLowerCase();
-  let snap;
+  const email=(user.email||'').toLowerCase();
   try {
-    snap = await getDocs(query(collection(db,'employees'), where('email','==',email), where('status','==','active')));
-  } catch (err) {
-    console.error('Employee lookup failed:', err);
-    setMsg('Could not load employee profile. Firestore rules may be blocking employees collection. ' + (err.code || err.message), 'error');
-    await signOut(auth);
-    return;
-  }
-  if (snap.empty) {
-    setMsg('No active employee record is linked to this email. Ask admin to add this email to your employee profile.','error');
-    await signOut(auth);
-    return;
-  }
-  const empDoc = snap.docs[0];
-  currentEmp = { id: empDoc.id, ...empDoc.data() };
-  if (!currentEmp.authUid) {
-    try { await updateDoc(doc(db,'employees',empDoc.id), { authUid: user.uid }); currentEmp.authUid = user.uid; } catch (e) {}
-  }
-  document.getElementById('login-section').style.display = 'none';
-  document.getElementById('emp-dashboard-section').style.display = 'block';
-  document.getElementById('emp-display-name').textContent = currentEmp.name;
-  document.getElementById('emp-display-sub').textContent = `Signed in as ${email} • Rate: $${Number(currentEmp.hourlyRate||0).toFixed(2)}/hr`;
-  setMsg('');
-  await loadEmpTimecards(7);
+    const snap=await getDocs(query(collection(db,'employees'),where('email','==',email),where('status','==','active')));
+    if (snap.empty) { setMsg('No employee record linked to this email. Ask admin to add it.','error'); await signOut(auth); return; }
+    const empDoc=snap.docs[0];
+    currentEmp={id:empDoc.id,...empDoc.data()};
+    if (!currentEmp.authUid) { try{await updateDoc(doc(db,'employees',empDoc.id),{authUid:user.uid});currentEmp.authUid=user.uid;}catch(e){} }
+    show('emp-dashboard-section','block');
+    document.getElementById('emp-display-name').textContent=currentEmp.name;
+    document.getElementById('emp-display-sub').textContent=`Signed in as ${email} · Rate: $${Number(currentEmp.hourlyRate||0).toFixed(2)}/hr`;
+    setMsg('');
+    await loadEmpTimecards(7);
+  } catch(err) { setMsg('Could not load profile: '+(err.code||err.message),'error'); await signOut(auth); }
 }
 
-window.empFilterDays = async function(days, btn) {
-  document.querySelectorAll('.week-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  await loadEmpTimecards(days);
+// ══ EMPLOYEE VIEW ══
+window.empFilterDays = async function(days,btn) {
+  document.querySelectorAll('.week-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active'); await loadEmpTimecards(days);
+};
+async function loadEmpTimecards(days) {
+  if (!currentEmp||!currentUser) return;
+  const sinceStr=new Date(Date.now()-days*86400000).toISOString().slice(0,10);
+  try {
+    const snap=await getDocs(query(collection(db,'timecards'),where('employeeId','==',currentEmp.id),where('date','>=',sinceStr),orderBy('date','desc')));
+    const recs=snap.docs.map(d=>({id:d.id,...d.data()}));
+    const weekAgoStr=new Date(Date.now()-7*86400000).toISOString().slice(0,10);
+    const moAgoStr=new Date(Date.now()-30*86400000).toISOString().slice(0,10);
+    let weekHrs=0,moEarnings=0;
+    recs.forEach(r=>{const h=workHours(r);if(!h)return;if(r.date>=weekAgoStr)weekHrs+=h;if(r.date>=moAgoStr)moEarnings+=h*(currentEmp.hourlyRate||0);});
+    document.getElementById('emp-week-hrs').textContent=weekHrs.toFixed(1)+'h';
+    document.getElementById('emp-month-earnings').textContent='$'+moEarnings.toFixed(2);
+    const tbody=document.getElementById('emp-table-body');
+    if (!recs.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:30px;">No records found</td></tr>';return;}
+    tbody.innerHTML=recs.map(r=>{const h=workHours(r);return`<tr><td>${fmtDate(r.date)}</td><td>${fmtTime(r.dayIn)}</td><td>${fmtTime(r.lunchOut)}</td><td>${fmtTime(r.lunchIn)}</td><td>${fmtTime(r.dayOut)}</td><td>${h?h.toFixed(2)+'h':'—'}</td><td>${statusBadge(r)}</td></tr>`;}).join('');
+  } catch(err) {
+    document.getElementById('emp-table-body').innerHTML=`<tr><td colspan="7" style="text-align:center;color:var(--red);padding:30px;">Could not load timecards: ${err.code||err.message}</td></tr>`;
+  }
+}
+
+// ══ ADMIN PIN ══
+let adminPinBuffer='';
+window.openAdminPinModal = function() {
+  adminPinBuffer=''; updateAdminPinDots();
+  document.getElementById('admin-pin-msg').textContent='';
+  document.getElementById('admin-pin-modal').classList.add('open');
+};
+window.closeAdminPinModal = function() { document.getElementById('admin-pin-modal').classList.remove('open'); };
+window.adminPinPress = function(n) {
+  if (adminPinBuffer.length>=4) return;
+  adminPinBuffer+=n; updateAdminPinDots();
+  if (adminPinBuffer.length===4) setTimeout(checkAdminPin,180);
+};
+window.adminPinBack  = ()=>{ adminPinBuffer=adminPinBuffer.slice(0,-1); updateAdminPinDots(); };
+window.adminPinClear = ()=>{ adminPinBuffer=''; updateAdminPinDots(); };
+function updateAdminPinDots() {
+  for(let i=0;i<4;i++) document.getElementById('apd'+i).classList.toggle('filled',i<adminPinBuffer.length);
+}
+async function checkAdminPin() {
+  if (adminPinBuffer===ADMIN_PIN) {
+    closeAdminPinModal();
+    hide('emp-dashboard-section');
+    show('admin-panel','block');
+    await loadAdminData();
+  } else {
+    document.getElementById('admin-pin-msg').textContent='Incorrect PIN. Try again.';
+    adminPinBuffer=''; updateAdminPinDots();
+  }
+}
+window.exitAdmin = function() {
+  hide('admin-panel');
+  show('emp-dashboard-section','block');
 };
 
-async function loadEmpTimecards(days) {
-  if (!currentEmp || !currentUser) return;
-  const sinceDate = new Date(); sinceDate.setDate(sinceDate.getDate() - days);
-  const sinceStr = sinceDate.toISOString().slice(0,10);
-  let snap;
-  try {
-    snap = await getDocs(query(collection(db,'timecards'),
-      where('employeeId','==',currentEmp.id),
-      where('date','>=',sinceStr),
-      orderBy('date','desc')
-    ));
-  } catch (err) {
-    console.error('Timecard query failed:', err);
-    const tbody = document.getElementById('emp-table-body');
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--red);padding:30px;">Could not load timecards: '+(err.code || err.message)+'</td></tr>';
-    setMsg('Signed in, but timecards could not load. Check Firestore rules/indexes. ' + (err.code || err.message), 'error');
-    return;
-  }
-  const recs = snap.docs.map(d => ({ id:d.id, ...d.data() }));
-  console.log('Employee document ID:', currentEmp.id, 'Records found:', recs.length, recs);
-  const weekAgoStr = new Date(Date.now()-7*86400000).toISOString().slice(0,10);
-  const moAgoStr = new Date(Date.now()-30*86400000).toISOString().slice(0,10);
-  let weekHrs=0, moEarnings=0;
-  recs.forEach(r => {
-    const h = workHours(r);
-    if (!h) return;
-    if (r.date >= weekAgoStr) weekHrs += h;
-    if (r.date >= moAgoStr) moEarnings += h * (currentEmp.hourlyRate||0);
-  });
-  document.getElementById('emp-week-hrs').textContent = weekHrs.toFixed(1)+'h';
-  document.getElementById('emp-month-earnings').textContent = '$'+moEarnings.toFixed(2);
-  const tbody = document.getElementById('emp-table-body');
-  if (!recs.length) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:30px;">No records found</td></tr>';
-    return;
-  }
-  tbody.innerHTML = recs.map(r => {
-    const h = workHours(r);
-    return `<tr><td>${fmtDate(r.date)}</td><td>${fmtTime(r.dayIn)}</td><td>${fmtTime(r.lunchOut)}</td><td>${fmtTime(r.lunchIn)}</td><td>${fmtTime(r.dayOut)}</td><td>${h ? h.toFixed(2)+'h' : '—'}</td><td>${statusBadge(r)}</td></tr>`;
-  }).join('');
+// ══ ADMIN DATA ══
+let allEmployees=[], allTimecards=[];
+async function loadAdminData() {
+  const eSnap=await getDocs(collection(db,'employees'));
+  allEmployees=eSnap.docs.map(d=>({id:d.id,...d.data()}));
+  const tSnap=await getDocs(query(collection(db,'timecards'),orderBy('date','desc')));
+  allTimecards=tSnap.docs.map(d=>({id:d.id,...d.data()}));
+  renderAdminEmpTable();
+  renderAdminTimecards();
+  const empOpts='<option value="">All Employees</option>'+allEmployees.map(e=>`<option value="${e.id}">${e.name}</option>`).join('');
+  document.getElementById('tc-filter-emp').innerHTML=empOpts;
+  document.getElementById('tc-form-emp').innerHTML=allEmployees.map(e=>`<option value="${e.id}">${e.name}</option>`).join('');
+  const now=new Date();
+  document.getElementById('pr-from').value=new Date(now.getFullYear(),now.getMonth(),1).toISOString().slice(0,10);
+  document.getElementById('pr-to').value=new Date(now.getFullYear(),now.getMonth()+1,0).toISOString().slice(0,10);
+  renderPayroll();
 }
+
+function renderAdminEmpTable() {
+  const tbody=document.getElementById('admin-emp-table');
+  if (!allEmployees.length){tbody.innerHTML='<tr><td colspan="6" class="empty-state">No employees yet</td></tr>';return;}
+  tbody.innerHTML=allEmployees.map(e=>`<tr>
+    <td style="font-weight:500">${e.name}</td>
+    <td style="color:var(--muted);font-size:12px;">${e.email||'—'}</td>
+    <td><code style="background:var(--bg);padding:2px 8px;border-radius:4px;">${e.pin||'—'}</code></td>
+    <td>$${Number(e.hourlyRate||0).toFixed(2)}/hr</td>
+    <td><span class="badge ${e.status==='active'?'badge-in':'badge-out'}">${e.status}</span></td>
+    <td><button class="btn-edit-sm" onclick="editEmployee('${e.id}')">Edit</button></td>
+  </tr>`).join('');
+}
+
+window.renderAdminTimecards = function() {
+  const empF=document.getElementById('tc-filter-emp').value;
+  const frF=document.getElementById('tc-filter-from').value;
+  const toF=document.getElementById('tc-filter-to').value;
+  let recs=allTimecards.filter(r=>{
+    if (empF&&r.employeeId!==empF) return false;
+    if (frF&&r.date<frF) return false;
+    if (toF&&r.date>toF) return false;
+    return true;
+  });
+  const tbody=document.getElementById('admin-tc-table');
+  if (!recs.length){tbody.innerHTML='<tr><td colspan="9" class="empty-state">No records</td></tr>';return;}
+  tbody.innerHTML=recs.map(r=>{const h=workHours(r);return`<tr>
+    <td style="font-weight:500">${r.employeeName}</td>
+    <td>${fmtDate(r.date)}</td>
+    <td>${fmtTime(r.dayIn)}</td><td>${fmtTime(r.lunchOut)}</td>
+    <td>${fmtTime(r.lunchIn)}</td><td>${fmtTime(r.dayOut)}</td>
+    <td>${h?h.toFixed(2)+'h':'—'}</td>
+    <td>${statusBadge(r)}</td>
+    <td><button class="btn-edit-sm" onclick="editTc('${r.id}')">Edit</button></td>
+  </tr>`;}).join('');
+};
+
+window.renderPayroll = function() {
+  const from=document.getElementById('pr-from').value;
+  const to=document.getElementById('pr-to').value;
+  if (!from||!to) return;
+  let grand=0;
+  const rows=allEmployees.map(emp=>{
+    const recs=allTimecards.filter(r=>r.employeeId===emp.id&&r.date>=from&&r.date<=to);
+    const hrs=recs.reduce((s,r)=>s+(workHours(r)||0),0);
+    const pay=hrs*(emp.hourlyRate||0); grand+=pay;
+    return{emp,hrs,pay};
+  }).filter(r=>r.hrs>0);
+  document.getElementById('pr-total').textContent='$'+grand.toFixed(2);
+  const list=document.getElementById('payroll-list');
+  if (!rows.length){list.innerHTML='<div class="empty-state" style="background:white;border-radius:var(--radius);border:1px solid var(--border);padding:40px;">No payroll data for this period</div>';return;}
+  list.innerHTML=rows.map(r=>`<div class="payroll-card">
+    <div><div class="payroll-emp-name">${r.emp.name}</div><div class="payroll-meta">$${Number(r.emp.hourlyRate||0).toFixed(2)}/hr</div></div>
+    <div><div class="payroll-amount">$${r.pay.toFixed(2)}</div><div class="payroll-hours">${r.hrs.toFixed(2)} hrs</div></div>
+  </div>`).join('');
+};
+
+window.adminTab = function(tab,btn) {
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active'); document.getElementById('tab-'+tab).classList.add('active');
+};
+
+// ══ EMPLOYEE MODAL ══
+let editingEmpId=null;
+window.openEmpModal = function(id) {
+  editingEmpId=id||null;
+  document.getElementById('emp-modal-title').textContent=id?'Edit Employee':'Add Employee';
+  const e=id?allEmployees.find(x=>x.id===id):{};
+  document.getElementById('emp-form-name').value=e.name||'';
+  document.getElementById('emp-form-email').value=e.email||'';
+  document.getElementById('emp-form-pin').value=e.pin||'';
+  document.getElementById('emp-form-rate').value=e.hourlyRate||'';
+  document.getElementById('emp-form-status').value=e.status||'active';
+  document.getElementById('emp-form-msg').textContent='';
+  document.getElementById('emp-modal').classList.add('open');
+};
+window.closeEmpModal = ()=>document.getElementById('emp-modal').classList.remove('open');
+window.editEmployee  = id=>openEmpModal(id);
+window.saveEmployee  = async function() {
+  const name=document.getElementById('emp-form-name').value.trim();
+  const email=document.getElementById('emp-form-email').value.trim().toLowerCase();
+  const pin=document.getElementById('emp-form-pin').value.trim();
+  const rate=parseFloat(document.getElementById('emp-form-rate').value);
+  const status=document.getElementById('emp-form-status').value;
+  const msg=document.getElementById('emp-form-msg');
+  if (!name||!pin||pin.length!==4||!/^\d{4}$/.test(pin)){msg.textContent='Valid name and 4-digit PIN required.';return;}
+  if (isNaN(rate)||rate<0){msg.textContent='Enter a valid hourly rate.';return;}
+  if (allEmployees.find(e=>e.pin===pin&&e.id!==editingEmpId)){msg.textContent='That PIN is already in use.';return;}
+  if (email&&allEmployees.find(e=>e.email===email&&e.id!==editingEmpId)){msg.textContent='That email is already in use.';return;}
+  msg.textContent='Saving…';
+  if (editingEmpId){await updateDoc(doc(db,'employees',editingEmpId),{name,email,pin,hourlyRate:rate,status});}
+  else{await addDoc(collection(db,'employees'),{name,email,pin,hourlyRate:rate,status});}
+  closeEmpModal(); await loadAdminData();
+};
+
+// ══ TIMECARD MODAL ══
+let editingTcId=null;
+window.openAddTcModal = function() {
+  editingTcId=null;
+  document.getElementById('tc-modal-title').textContent='Add Timecard Entry';
+  document.getElementById('tc-form-date').value=todayStr();
+  ['in','lout','lin','out'].forEach(f=>document.getElementById('tc-form-'+f).value='');
+  document.getElementById('tc-delete-btn').style.display='none';
+  document.getElementById('tc-form-msg').textContent='';
+  document.getElementById('tc-modal').classList.add('open');
+};
+window.editTc = function(id) {
+  editingTcId=id;
+  const r=allTimecards.find(x=>x.id===id);
+  document.getElementById('tc-modal-title').textContent='Edit Timecard';
+  document.getElementById('tc-form-emp').value=r.employeeId||'';
+  document.getElementById('tc-form-date').value=r.date||'';
+  document.getElementById('tc-form-in').value=r.dayIn?toTS(r.dayIn).toDate().toTimeString().slice(0,5):'';
+  document.getElementById('tc-form-lout').value=r.lunchOut?toTS(r.lunchOut).toDate().toTimeString().slice(0,5):'';
+  document.getElementById('tc-form-lin').value=r.lunchIn?toTS(r.lunchIn).toDate().toTimeString().slice(0,5):'';
+  document.getElementById('tc-form-out').value=r.dayOut?toTS(r.dayOut).toDate().toTimeString().slice(0,5):'';
+  document.getElementById('tc-delete-btn').style.display='inline-block';
+  document.getElementById('tc-form-msg').textContent='';
+  document.getElementById('tc-modal').classList.add('open');
+};
+window.closeTcModal = ()=>document.getElementById('tc-modal').classList.remove('open');
+window.deleteTc = async function() {
+  if (!editingTcId||!confirm('Delete this timecard entry?')) return;
+  await deleteDoc(doc(db,'timecards',editingTcId));
+  closeTcModal(); await loadAdminData();
+};
+window.saveTc = async function() {
+  const empId=document.getElementById('tc-form-emp').value;
+  const date=document.getElementById('tc-form-date').value;
+  const inV=document.getElementById('tc-form-in').value;
+  const loutV=document.getElementById('tc-form-lout').value;
+  const linV=document.getElementById('tc-form-lin').value;
+  const outV=document.getElementById('tc-form-out').value;
+  const msgEl=document.getElementById('tc-form-msg');
+  if (!empId||!date){msgEl.textContent='Employee and date required.';return;}
+  if (!inV){msgEl.textContent='Day In time is required.';return;}
+  const emp=allEmployees.find(e=>e.id===empId);
+  const data={employeeId:empId,employeeName:emp?.name||'',date,dayIn:dateTimeToTS(date,inV),lunchOut:dateTimeToTS(date,loutV),lunchIn:dateTimeToTS(date,linV),dayOut:dateTimeToTS(date,outV)};
+  msgEl.textContent='Saving…';
+  if (editingTcId){await updateDoc(doc(db,'timecards',editingTcId),data);}
+  else{await addDoc(collection(db,'timecards'),data);}
+  closeTcModal(); await loadAdminData();
+};
 </script>
 </body>
 </html>
