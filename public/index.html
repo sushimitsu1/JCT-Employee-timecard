@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>JCT My Timecard</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="mock-ribbon">Example data — not for payroll</div>
+  <header class="header">
+    <div class="header-logo"><div class="logo-mark">JCT</div><span>My Timecard</span></div>
+    <div class="header-right">
+      <span class="role-pill" id="role-pill" hidden>Owner</span>
+      <button class="logout-btn" id="sign-out" type="button" hidden>Sign out</button>
+    </div>
+  </header>
+
+  <main id="signin-view" class="signin-main">
+    <div class="card">
+      <h1>Enter your PIN</h1>
+      <p class="sub">4–6 digit PIN · employee or owner</p>
+      <div class="role-hint">Example: Sample Employee</div>
+      <div class="pin-dots" id="pin-dots" aria-live="polite"></div>
+      <div class="keypad" id="keypad">
+        <button class="pin-key" type="button" data-digit="1">1</button>
+        <button class="pin-key" type="button" data-digit="2">2</button>
+        <button class="pin-key" type="button" data-digit="3">3</button>
+        <button class="pin-key" type="button" data-digit="4">4</button>
+        <button class="pin-key" type="button" data-digit="5">5</button>
+        <button class="pin-key" type="button" data-digit="6">6</button>
+        <button class="pin-key" type="button" data-digit="7">7</button>
+        <button class="pin-key" type="button" data-digit="8">8</button>
+        <button class="pin-key" type="button" data-digit="9">9</button>
+        <button class="pin-key action" type="button" id="pin-clear">Clear</button>
+        <button class="pin-key" type="button" data-digit="0">0</button>
+        <button class="pin-key action" type="button" id="pin-back" aria-label="Backspace">⌫</button>
+      </div>
+      <button class="btn-signin" id="sign-in" type="button" disabled>Sign In</button>
+      <p class="hint">Thumb-friendly keypad · no password</p>
+      <p class="form-msg" id="signin-msg" role="alert"></p>
+    </div>
+  </main>
+
+  <section id="employee-view" hidden>
+    <div class="content">
+      <div class="greet" id="greet"></div>
+      <div class="date" id="today-label"></div>
+      <div class="status-card" id="status-card">
+        <div class="status-label">Current status</div>
+        <div class="status-val" id="status-val"></div>
+        <div class="status-since" id="status-since"></div>
+      </div>
+      <div class="week-card">
+        <div>
+          <div class="week-label">This week</div>
+          <div class="week-range-sub" id="emp-week-range"></div>
+        </div>
+        <div class="week-val" id="emp-week-hours"></div>
+      </div>
+      <div class="section-title">Today's punches</div>
+      <div class="punches" id="today-punches"></div>
+    </div>
+    <div class="bottom-bar">
+      <button class="btn-primary-giant is-in" id="primary-action" type="button">Clock In</button>
+      <button class="btn-lunch" id="lunch-action" type="button">Lunch Out</button>
+      <p class="action-error" id="action-error" role="alert"></p>
+      <div class="read-only">Employee view · no edits</div>
+    </div>
+  </section>
+
+  <section id="owner-view" hidden>
+    <main class="owner-main">
+      <div class="page-head">
+        <h1 id="owner-title">Weekly hours</h1>
+        <div class="page-sub">Owner view · edit punches · export for Friday payroll</div>
+      </div>
+      <div class="week-bar">
+        <div class="week-nav">
+          <button class="week-btn" id="week-prev" type="button" aria-label="Previous week">‹</button>
+          <div>
+            <div class="week-range" id="week-label"></div>
+            <div class="pay-note" id="pay-label"></div>
+          </div>
+          <button class="week-btn" id="week-next" type="button" aria-label="Next week">›</button>
+        </div>
+        <button class="btn-export" id="export-week" type="button">Export week (CSV)</button>
+      </div>
+      <div class="totals">
+        <div class="total-card">
+          <div class="total-label">Regular hours</div>
+          <div class="total-val" id="regular-hours"></div>
+        </div>
+        <div class="total-card">
+          <div class="total-label">Overtime hours</div>
+          <div class="total-val ot" id="ot-hours"></div>
+          <div class="total-note">Hours over 40 in the week, at 1.5×. No daily overtime.</div>
+        </div>
+        <div class="total-card">
+          <div class="total-label">Hourly rate (editable)</div>
+          <div class="rate-field">
+            <span>$</span>
+            <input id="rate-input" type="text" inputmode="decimal" aria-label="Hourly rate" />
+          </div>
+          <button class="btn-save-rate" id="save-rate" type="button">Save rate</button>
+          <div class="total-note" id="rate-note"></div>
+        </div>
+        <div class="total-card">
+          <div class="total-label">Week total hrs</div>
+          <div class="total-val" id="total-hours"></div>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <div class="table-head">
+          <h2>Daily punches</h2>
+          <span style="font-size:13px;color:var(--muted);">Example data only</span>
+        </div>
+        <div class="desktop-only" style="overflow-x:auto;">
+          <table class="desktop-table">
+            <thead>
+              <tr>
+                <th>Day</th><th>In</th><th>Lunch out</th><th>Lunch in</th><th>Out</th><th>Hours</th><th>Status</th><th></th>
+              </tr>
+            </thead>
+            <tbody id="day-rows"></tbody>
+          </table>
+        </div>
+        <div class="mobile-days mobile-only" id="day-cards"></div>
+      </div>
+      <p class="footer-note" id="pay-footer"></p>
+      <p class="form-msg error" id="owner-error" role="alert"></p>
+    </main>
+  </section>
+
+  <div class="modal-overlay" id="edit-modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="edit-title">
+      <h2 id="edit-title">Edit day</h2>
+      <p class="modal-sub">Times are Pacific. Add, change, or delete punches, then save.</p>
+      <div id="edit-rows"></div>
+      <button class="btn-add" id="add-punch" type="button">Add punch</button>
+      <p class="form-msg error" id="edit-error" role="alert"></p>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="edit-cancel" type="button">Cancel</button>
+        <button class="btn-modal-save" id="edit-save" type="button">Save</button>
+      </div>
+    </div>
+  </div>
+  <script src="/app.js"></script>
+</body>
+</html>
