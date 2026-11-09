@@ -1,0 +1,41 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "jct-timecard",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-11-09",
+  "compatibility_flags": ["nodejs_compat"],
+  // Non-secret. Raise only if a future review asks for more PBKDF2 work.
+  // Existing users keep the iteration count stored on their row.
+  "vars": {
+    "PIN_PBKDF2_ITERATIONS": "210000"
+  },
+  "secrets": {
+    "required": ["PIN_PEPPER", "SESSION_SECRET"]
+  },
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": true
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "jct-timecard",
+      // Placeholder. Replace after `npx wrangler d1 create jct-timecard`.
+      // Do not point this at a database that has real payroll data.
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "observability": {
+    "enabled": true,
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 1
+    },
+    "traces": {
+      "enabled": true,
+      "head_sampling_rate": 1
+    }
+  }
+}

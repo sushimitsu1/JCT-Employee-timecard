@@ -1,0 +1,12 @@
+# Local-only placeholders. Copying this file is optional:
+# `npm run dev` writes a gitignored .dev.vars with random values when
+# PIN_PEPPER or SESSION_SECRET is missing or shorter than 16 characters.
+#
+# Production (do this by hand later — this repo does not deploy):
+#   npx wrangler secret put PIN_PEPPER
+#   npx wrangler secret put SESSION_SECRET
+# Wrangler prompts for the value. Do not pass the secret on the command line,
+# do not commit it, and do not reuse the local .dev.vars value.
+
+PIN_PEPPER=
+SESSION_SECRET=
